@@ -75,11 +75,60 @@ A visually appealing chatbot UI that performs Retrieval Augmented Generation (RA
 
 ### Google Drive Setup
 
-1. Create a Google Cloud project
-2. Enable the Google Drive API
-3. Create a service account and download the JSON key
-4. Share your Google Drive folder with the service account email
-5. Copy the folder ID from the URL (the part after `/folders/`)
+#### Step 1: Create a Google Cloud Project
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Click the project dropdown at the top and select **New Project**
+3. Enter a project name (e.g., "RAG Chatbot") and click **Create**
+
+#### Step 2: Enable the Google Drive API
+
+1. In your project, go to **APIs & Services > Library**
+2. Search for "Google Drive API"
+3. Click on it and then click **Enable**
+
+#### Step 3: Create a Service Account
+
+1. Go to **APIs & Services > Credentials**
+2. Click **Create Credentials > Service Account**
+3. Enter a name (e.g., "drive-reader") and click **Create and Continue**
+4. Skip the optional steps and click **Done**
+
+#### Step 4: Generate the JSON Key
+
+1. In the Credentials page, click on your newly created service account
+2. Go to the **Keys** tab
+3. Click **Add Key > Create new key**
+4. Select **JSON** and click **Create**
+5. A JSON file will be downloaded - keep this safe!
+
+#### Step 5: Format the Key for .env.local
+
+The JSON key needs to be on a single line. You can do this by:
+
+```bash
+# On Mac/Linux, run this in terminal:
+cat path/to/downloaded-key.json | jq -c
+```
+
+Or manually remove all newlines from the JSON. Your `.env.local` should look like:
+
+```
+GOOGLE_SERVICE_ACCOUNT_KEY={"type":"service_account","project_id":"your-project","private_key_id":"...","private_key":"-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n","client_email":"drive-reader@your-project.iam.gserviceaccount.com","client_id":"...","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_x509_cert_url":"..."}
+```
+
+#### Step 6: Share Your Google Drive Folder
+
+1. Find the `client_email` in your JSON key (looks like `name@project-id.iam.gserviceaccount.com`)
+2. Go to Google Drive and right-click your folder
+3. Click **Share** and paste the service account email
+4. Give it **Viewer** access and click **Send**
+
+#### Step 7: Get the Folder ID
+
+1. Open your Google Drive folder in a browser
+2. The URL will look like: `https://drive.google.com/drive/folders/1ABC123xyz...`
+3. Copy the part after `/folders/` - that's your `GOOGLE_DRIVE_FOLDER_ID`
 
 ## Usage
 
