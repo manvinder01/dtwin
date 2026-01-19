@@ -1,0 +1,34 @@
+{
+  "name": "dtwin",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "@types/node": "^25.0.9",
+    "@types/react": "^19.2.8",
+    "@types/react-dom": "^19.2.3",
+    "autoprefixer": "^10.4.23",
+    "googleapis": "^170.1.0",
+    "mammoth": "^1.11.0",
+    "next": "^14.2.35",
+    "openai": "^6.16.0",
+    "pdf-parse": "^2.4.5",
+    "postcss": "^8.5.6",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "redis": "^5.10.0",
+    "tailwindcss": "^4.1.18",
+    "typescript": "^5.9.3",
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "@types/pdf-parse": "^1.1.5",
+    "@types/uuid": "^10.0.0"
+  }
+}
