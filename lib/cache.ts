@@ -23,7 +23,7 @@ function getConfig(): LangCacheConfig {
 export async function checkCache(
   prompt: string,
   _context: string
-): Promise<{ hit: boolean; response?: string }> {
+): Promise<{ hit: boolean; response?: string; distance?: number; cachedPrompt?: string }> {
   console.log('[LangCache] Checking cache for prompt...');
   console.log(`[LangCache] Prompt: "${prompt.substring(0, 50)}..."`);
 
@@ -51,15 +51,21 @@ export async function checkCache(
     }
 
     const result = await response.json();
-    console.log('[LangCache] Search response:', JSON.stringify(result).substring(0, 200));
+    console.log('[LangCache] Search response:', JSON.stringify(result).substring(0, 300));
 
-    // API returns { data: [{ response: "..." }] }
+    // API returns { data: [{ response: "...", prompt: "...", distance: 0.xx }] }
     if (result?.data?.length > 0 && result.data[0].response) {
-      const cachedResponse = result.data[0].response;
-      console.log(`[LangCache] HIT! Found cached response (${cachedResponse.length} chars)`);
+      const entry = result.data[0];
+      const cachedResponse = entry.response;
+      const distance = entry.distance ?? entry.score ?? null;
+      const cachedPrompt = entry.prompt;
+
+      console.log(`[LangCache] HIT! Distance: ${distance}, Cached prompt: "${cachedPrompt?.substring(0, 50)}..."`);
       return {
         hit: true,
         response: cachedResponse,
+        distance,
+        cachedPrompt,
       };
     }
 

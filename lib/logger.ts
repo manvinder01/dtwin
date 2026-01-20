@@ -80,8 +80,11 @@ export function subscribe(listener: (log: LogEntry) => void): () => void {
 // Convenience methods
 export const logger = {
   cache: {
-    hit: (prompt: string, details?: Record<string, any>) =>
-      addLog('success', 'cache', `Cache HIT for: "${prompt.substring(0, 50)}..."`, details),
+    hit: (prompt: string, details?: Record<string, any>) => {
+      const distStr = details?.semanticDistance != null ? ` (distance: ${details.semanticDistance.toFixed(4)})` : '';
+      const timeStr = details?.elapsedMs != null ? ` in ${details.elapsedMs}ms` : '';
+      return addLog('success', 'cache', `Cache HIT${distStr}${timeStr}: "${prompt.substring(0, 40)}..."`, details);
+    },
     miss: (prompt: string, details?: Record<string, any>) =>
       addLog('info', 'cache', `Cache MISS for: "${prompt.substring(0, 50)}..."`, details),
     store: (prompt: string, details?: Record<string, any>) =>
@@ -100,8 +103,8 @@ export const logger = {
   llm: {
     start: (model: string, details?: Record<string, any>) =>
       addLog('info', 'llm', `Calling ${model}...`, details),
-    complete: (model: string, tokens?: number) =>
-      addLog('success', 'llm', `${model} response complete`, tokens ? { tokens } : undefined),
+    complete: (model: string, tokens?: number, elapsedMs?: number) =>
+      addLog('success', 'llm', `${model} response complete${elapsedMs ? ` in ${elapsedMs}ms` : ''}`, { tokens, elapsedMs }),
     error: (message: string, details?: Record<string, any>) =>
       addLog('error', 'llm', message, details),
   },

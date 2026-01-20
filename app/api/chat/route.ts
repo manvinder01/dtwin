@@ -6,6 +6,8 @@ import { logger } from '@/lib/logger';
 import { getSettings } from '@/lib/settings';
 
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+
   try {
     const { messages } = await request.json() as { messages: ChatMessage[] };
 
@@ -67,8 +69,12 @@ export async function POST(request: NextRequest) {
       try {
         const cacheResult = await checkCache(latestUserMessage.content, context);
         if (cacheResult.hit && cacheResult.response) {
+          const elapsedMs = Date.now() - startTime;
           logger.cache.hit(latestUserMessage.content, {
             responseLength: cacheResult.response.length,
+            semanticDistance: cacheResult.distance,
+            cachedPrompt: cacheResult.cachedPrompt,
+            elapsedMs,
           });
           // Return cached response as a simple text response (not streaming)
           return new Response(cacheResult.response, {
@@ -107,7 +113,8 @@ export async function POST(request: NextRequest) {
           }
           controller.close();
 
-          logger.llm.complete(settings.llm.model, fullResponse.length);
+          const elapsedMs = Date.now() - startTime;
+          logger.llm.complete(settings.llm.model, fullResponse.length, elapsedMs);
 
           // Store in cache after streaming completes (if enabled)
           if (settings.langcache.enabled) {
