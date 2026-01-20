@@ -109,6 +109,23 @@ export async function storeInCache(
   }
 }
 
+export async function getCacheStats(): Promise<{ enabled: boolean; host: string; cacheId: string }> {
+  try {
+    const { host, cacheId } = getConfig();
+    return {
+      enabled: true,
+      host,
+      cacheId,
+    };
+  } catch {
+    return {
+      enabled: false,
+      host: '',
+      cacheId: '',
+    };
+  }
+}
+
 export async function clearCache(): Promise<void> {
   console.log('[LangCache] Flushing cache...');
 
