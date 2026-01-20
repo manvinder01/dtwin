@@ -17,17 +17,33 @@ A simple RAG (Retrieval-Augmented Generation) chatbot for Google Drive. Ask ques
 ## Architecture
 
 ```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   Next.js UI    │────▶│   API Routes    │────▶│  Redis Cloud    │
-│  (Chat Interface)│     │  (RAG Pipeline) │     │  (Vector Store) │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-                               │                        │
-                    ┌──────────┼──────────┐            │
-                    ▼          ▼          ▼            ▼
-            ┌─────────────┐ ┌─────────────┐ ┌─────────────────┐
-            │  OpenAI API │ │ Google Drive│ │ Redis LangCache │
-            │   (GPT-4)   │ │     API     │ │(Semantic Cache) │
-            └─────────────┘ └─────────────┘ └─────────────────┘
+                            ┌─────────────────┐
+                            │  Google Drive   │
+                            │      API        │
+                            └────────┬────────┘
+                                     │ sync docs
+                                     ▼
+┌──────────────┐  query   ┌─────────────────────┐  store chunks  ┌──────────────────┐
+│              │─────────▶│                     │───────────────▶│   Redis Cloud    │
+│  Next.js UI  │          │    API Routes       │◀───────────────│  (Vector Store)  │
+│              │◀─────────│   (RAG Pipeline)    │  search chunks └──────────────────┘
+└──────────────┘ response └─────────────────────┘
+                                     │
+                          ┌──────────┴──────────┐
+                          ▼                     ▼
+                 ┌─────────────────┐   ┌─────────────────┐
+                 │ Redis LangCache │   │   OpenAI API    │
+                 │ (Semantic Cache)│   │    (GPT-4)      │
+                 └─────────────────┘   └─────────────────┘
+                          ▲                     │
+                          │    cache-aside      │
+                          └─────────────────────┘
+                            store on miss
+
+Cache-Aside Flow:
+1. Check LangCache for semantically similar query
+2. If HIT → return cached response
+3. If MISS → call GPT-4 → store response in cache → return
 ```
 
 ## Quick Start
