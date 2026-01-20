@@ -1,38 +1,36 @@
-# RAG Chatbot
+# DriveBot
 
-A visually appealing chatbot UI that performs Retrieval Augmented Generation (RAG) using Redis Cloud for vector storage and Google Drive for document ingestion.
+A simple RAG (Retrieval-Augmented Generation) chatbot for Google Drive. Ask questions about your documents and get AI-powered answers based on the content.
 
-![Next.js](https://img.shields.io/badge/Next.js-14-black)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
-![Redis](https://img.shields.io/badge/Redis-Cloud-red)
-![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4-green)
+![DriveBot](public/icon.svg)
 
 ## Features
 
-- **Modern Chat UI** - Clean, responsive interface with streaming responses
-- **Document Ingestion** - Upload PDFs, Word docs, text files, and markdown
-- **Google Drive Sync** - Automatically sync documents from a Google Drive folder
-- **Vector Search** - Fast similarity search using Redis Cloud with HNSW algorithm
-- **Streaming Responses** - Real-time token streaming from GPT-4
+- **Google Drive Integration**: Sync documents directly from your Google Drive folder
+- **Multi-format Support**: PDF, DOCX, TXT, and Markdown files
+- **Vector Search**: Redis Cloud with RediSearch for fast semantic search
+- **Semantic Caching**: Redis LangCache to save tokens on repeated queries
+- **Configurable Settings**: Adjust VectorDB, LangCache, and LLM hyperparameters via UI
+- **Real-time Logs**: View cache hits/misses, retrieved chunks, and LLM calls
+- **Streaming Responses**: Real-time streaming from GPT-4
 
-## Tech Stack
+## Architecture
 
-- **Frontend**: Next.js 14, React 18, Tailwind CSS
-- **Vector Database**: Redis Cloud with RediSearch
-- **LLM**: OpenAI GPT-4 Turbo
-- **Embeddings**: OpenAI text-embedding-3-small (1536 dimensions)
-- **Document Parsing**: pdf-parse, mammoth
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   Next.js UI    │────▶│   API Routes    │────▶│  Redis Cloud    │
+│  (Chat Interface)│     │  (RAG Pipeline) │     │  (Vector Store) │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+                               │
+                    ┌──────────┴──────────┐
+                    ▼                     ▼
+            ┌─────────────┐       ┌─────────────┐
+            │  OpenAI API │       │ Google Drive│
+            │   (GPT-4)   │       │     API     │
+            └─────────────┘       └─────────────┘
+```
 
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18+
-- Redis Cloud account ([free tier available](https://redis.com/try-free/))
-- OpenAI API key
-- Google Cloud service account (for Google Drive integration)
-
-### Installation
+## Quick Start
 
 1. Clone the repository:
    ```bash
@@ -45,18 +43,12 @@ A visually appealing chatbot UI that performs Retrieval Augmented Generation (RA
    npm install
    ```
 
-3. Create `.env.local` from the example:
+3. Copy the environment example and configure:
    ```bash
    cp .env.local.example .env.local
    ```
 
-4. Configure environment variables in `.env.local`:
-   ```
-   REDIS_URL=redis://default:password@host:port
-   OPENAI_API_KEY=sk-your-api-key
-   GOOGLE_SERVICE_ACCOUNT_KEY={"type":"service_account",...}
-   GOOGLE_DRIVE_FOLDER_ID=your-folder-id
-   ```
+4. Configure your environment variables (see [Configuration](#configuration))
 
 5. Run the development server:
    ```bash
@@ -67,120 +59,104 @@ A visually appealing chatbot UI that performs Retrieval Augmented Generation (RA
 
 ## Configuration
 
-### Redis Cloud Setup
+### Environment Variables
 
-1. Create a free Redis Cloud database at [redis.com](https://redis.com/try-free/)
-2. Enable the **RediSearch** module
-3. Copy the connection string to `REDIS_URL`
+Create a `.env.local` file with the following:
 
-### Google Drive Setup
+```env
+# Redis Cloud connection string
+REDIS_URL=redis://default:password@host:port
 
-#### Step 1: Create a Google Cloud Project
+# OpenAI API key
+OPENAI_API_KEY=sk-your-api-key
+
+# Google Service Account credentials (JSON string)
+GOOGLE_SERVICE_ACCOUNT_KEY={"type":"service_account",...}
+
+# Google Drive folder ID to sync documents from
+GOOGLE_DRIVE_FOLDER_ID=your-folder-id
+
+# Redis LangCache settings (optional, for semantic caching)
+LANGCACHE_HOST=https://your-langcache-endpoint.redis.cloud
+LANGCACHE_CACHE_ID=your-cache-id
+LANGCACHE_API_KEY=your-api-key
+```
+
+### Google Service Account Setup
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Click the project dropdown at the top and select **New Project**
-3. Enter a project name (e.g., "RAG Chatbot") and click **Create**
+2. Create a new project or select an existing one
+3. Enable the **Google Drive API**
+4. Go to **APIs & Services** → **Credentials**
+5. Click **Create Credentials** → **Service Account**
+6. Fill in the service account details and click **Create**
+7. Skip the optional steps and click **Done**
+8. Click on the created service account
+9. Go to **Keys** tab → **Add Key** → **Create new key** → **JSON**
+10. Download the JSON file
+11. Copy the entire JSON content into `GOOGLE_SERVICE_ACCOUNT_KEY`
 
-#### Step 2: Enable the Google Drive API
+### Share Google Drive Folder
 
-1. In your project, go to **APIs & Services > Library**
-2. Search for "Google Drive API"
-3. Click on it and then click **Enable**
+1. Open your Google Drive folder
+2. Click **Share**
+3. Add the service account email (found in the JSON key as `client_email`)
+4. Give it **Viewer** access
+5. Copy the folder ID from the URL: `https://drive.google.com/drive/folders/[FOLDER_ID]`
 
-#### Step 3: Create a Service Account
+### Redis Cloud Setup
 
-1. Go to **APIs & Services > Credentials**
-2. Click **Create Credentials > Service Account**
-3. Enter a name (e.g., "drive-reader") and click **Create and Continue**
-4. Skip the optional steps and click **Done**
+1. Create a free account at [Redis Cloud](https://redis.com/try-free/)
+2. Create a new database with the **RediSearch** module enabled
+3. Copy the connection string to `REDIS_URL`
 
-#### Step 4: Generate the JSON Key
+### LangCache Setup (Optional)
 
-1. In the Credentials page, click on your newly created service account
-2. Go to the **Keys** tab
-3. Click **Add Key > Create new key**
-4. Select **JSON** and click **Create**
-5. A JSON file will be downloaded - keep this safe!
+LangCache provides semantic caching to save tokens on similar queries:
 
-#### Step 5: Format the Key for .env.local
-
-The JSON key needs to be on a single line. You can do this by:
-
-```bash
-# On Mac/Linux, run this in terminal:
-cat path/to/downloaded-key.json | jq -c
-```
-
-Or manually remove all newlines from the JSON. Your `.env.local` should look like:
-
-```
-GOOGLE_SERVICE_ACCOUNT_KEY={"type":"service_account","project_id":"your-project","private_key_id":"...","private_key":"-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n","client_email":"drive-reader@your-project.iam.gserviceaccount.com","client_id":"...","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_x509_cert_url":"..."}
-```
-
-#### Step 6: Share Your Google Drive Folder
-
-1. Find the `client_email` in your JSON key (looks like `name@project-id.iam.gserviceaccount.com`)
-2. Go to Google Drive and right-click your folder
-3. Click **Share** and paste the service account email
-4. Give it **Viewer** access and click **Send**
-
-#### Step 7: Get the Folder ID
-
-1. Open your Google Drive folder in a browser
-2. The URL will look like: `https://drive.google.com/drive/folders/1ABC123xyz...`
-3. Copy the part after `/folders/` - that's your `GOOGLE_DRIVE_FOLDER_ID`
+1. Set up LangCache in your Redis Cloud account
+2. Create a cache and note the Cache ID
+3. Generate an API key
+4. Configure `LANGCACHE_HOST`, `LANGCACHE_CACHE_ID`, and `LANGCACHE_API_KEY`
 
 ## Usage
 
-### Uploading Documents
+### Syncing Documents
 
 1. Click the **Documents** button in the header
-2. Either:
-   - Click **Upload Files** to upload local documents
-   - Click **Sync from Google Drive** to import from your configured folder
+2. Click **Sync from Google Drive** to fetch documents from your configured folder
+3. Documents are automatically chunked and indexed
 
 ### Chatting
 
-Simply type your question in the input box and press Enter. The chatbot will:
-1. Convert your question to an embedding
-2. Search for relevant document chunks in Redis
-3. Send the context + question to GPT-4
-4. Stream the response back to you
+Simply type your question in the chat input. The chatbot will:
+1. Search for relevant document chunks using vector similarity
+2. Check the semantic cache for similar previous queries
+3. Generate a response using GPT-4 with the retrieved context
 
-## API Endpoints
+### Viewing Logs
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/chat` | POST | Send chat messages, returns streaming response |
-| `/api/ingest` | POST | Upload and ingest documents |
-| `/api/ingest` | GET | Get document chunk count |
-| `/api/ingest` | DELETE | Delete all documents |
-| `/api/gdrive` | GET | List files in Google Drive folder |
-| `/api/gdrive` | POST | Sync documents from Google Drive |
+Click **Logs** to see detailed information about:
+- Cache hits/misses
+- Retrieved document chunks with similarity scores
+- LLM invocations
 
-## Project Structure
+### Adjusting Settings
 
-```
-dtwin/
-├── app/
-│   ├── api/
-│   │   ├── chat/route.ts       # RAG chat endpoint
-│   │   ├── gdrive/route.ts     # Google Drive sync
-│   │   └── ingest/route.ts     # Document upload
-│   ├── globals.css
-│   ├── layout.tsx
-│   └── page.tsx
-├── components/
-│   ├── ChatInput.tsx
-│   ├── ChatWindow.tsx
-│   └── DocumentPanel.tsx
-├── lib/
-│   ├── documentLoader.ts       # PDF, DOCX, TXT parsing
-│   ├── embeddings.ts           # OpenAI embeddings & chat
-│   ├── gdrive.ts               # Google Drive client
-│   └── redis.ts                # Redis vector operations
-└── ...
-```
+Click the **Settings** (gear) icon to configure:
+- **Vector DB**: Top K results, similarity score threshold
+- **LangCache**: Enable/disable, similarity threshold
+- **LLM**: Model, temperature, max tokens, system prompts
+
+## Tech Stack
+
+- **Frontend**: Next.js 14, React, Tailwind CSS
+- **Backend**: Next.js API Routes
+- **Database**: Redis Cloud with RediSearch
+- **Embeddings**: OpenAI text-embedding-3-small
+- **LLM**: OpenAI GPT-4 Turbo
+- **Caching**: Redis LangCache
+- **Document Parsing**: pdf-parse, mammoth
 
 ## License
 

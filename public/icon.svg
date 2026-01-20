@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="iconGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7C3AED;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="iconGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2563EB;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Background rounded square -->
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#iconGrad1)"/>
+  <!-- Drive/folder shape -->
+  <path d="M16 22h32l-5 22H11l5-22z" fill="#fff" opacity="0.9"/>
+  <path d="M16 22l7-9h18l7 9H16z" fill="#fff" opacity="0.7"/>
+  <!-- Chat bubble overlay -->
+  <circle cx="46" cy="46" r="14" fill="url(#iconGrad2)"/>
+  <ellipse cx="46" cy="45" rx="8" ry="6" fill="#fff"/>
+  <circle cx="42" cy="45" r="1.5" fill="#3B82F6"/>
+  <circle cx="46" cy="45" r="1.5" fill="#3B82F6"/>
+  <circle cx="50" cy="45" r="1.5" fill="#3B82F6"/>
+  <path d="M46 51l-3 5 6-3-3-2z" fill="#fff"/>
+</svg>

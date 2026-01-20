@@ -2,8 +2,11 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'RAG Chatbot',
-  description: 'Chat with your documents using AI',
+  title: 'DriveBot',
+  description: 'A simple RAG chatbot for Google Drive',
+  icons: {
+    icon: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({
