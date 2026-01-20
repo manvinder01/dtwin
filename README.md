@@ -21,13 +21,13 @@ A simple RAG (Retrieval-Augmented Generation) chatbot for Google Drive. Ask ques
 │   Next.js UI    │────▶│   API Routes    │────▶│  Redis Cloud    │
 │  (Chat Interface)│     │  (RAG Pipeline) │     │  (Vector Store) │
 └─────────────────┘     └─────────────────┘     └─────────────────┘
-                               │
-                    ┌──────────┴──────────┐
-                    ▼                     ▼
-            ┌─────────────┐       ┌─────────────┐
-            │  OpenAI API │       │ Google Drive│
-            │   (GPT-4)   │       │     API     │
-            └─────────────┘       └─────────────┘
+                               │                        │
+                    ┌──────────┼──────────┐            │
+                    ▼          ▼          ▼            ▼
+            ┌─────────────┐ ┌─────────────┐ ┌─────────────────┐
+            │  OpenAI API │ │ Google Drive│ │ Redis LangCache │
+            │   (GPT-4)   │ │     API     │ │(Semantic Cache) │
+            └─────────────┘ └─────────────┘ └─────────────────┘
 ```
 
 ## Quick Start
